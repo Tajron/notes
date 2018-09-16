@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="UTF-8">
+      <title>Notes</title>
+      <style>
+         #main{
+         width:100%;
+         height:100%;
+         }
+         .button {
+         position: absolute;
+         top:0;
+         left:0;
+         width:30px;
+         height:30px;
+         }
+         .divs{
+         border:2px solid black;
+         border-radius:5px;
+         min-width:262px;
+         min-height:186px;
+         width:262px;
+         height:186px;
+         position: absolute;
+         top:46%;
+         left:46%;
+         background-color:white;
+         text-align: left;
+         }
+         .text{
+         position: relative;
+         top:0;
+         left:5px;
+         }
+         #incelmentsP{
+         position:absolute;
+         right:10px;
+         font-size:21px;
+         margin-top:10px;
+         }
+         #incelmentsL{
+         position:absolute;
+         right:10px;
+         top:42.0px;
+         font-size:21px;
+         }
+         .tt{
+         position:relative;
+         top:10px;
+         width:97.4%;
+         height:calc(100% - 78px);
+         border: none;
+         }
+         #form{
+         width:50%;
+         height:20%;
+         position: absolute;
+         top:30%;
+         left:25%;
+         background-color:white;
+         text-align: center;
+         }
+      </style>
+      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-route.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+      <!--<script src="https://cloud.tinymce.com/stable/tinymce.min.js"></script>-->
+      <script>
+	  alert("It is not working propably yet");
+	  
+	  
+         var app = angular.module("myApp", ["ngRoute"]);
+         app.config(function($routeProvider) {
+             $routeProvider
+         	.when("/", {
+                 templateUrl : "main.html",
+         		controller :"myCtrl"
+             })
+         	.when("/:name", {
+                 templateUrl : "note.html",
+         		controller :"myCtrl"
+             })
+         });
+         app.controller("myCtrl", function($scope,$compile,$rootScope,$location,$document,$http) {
+         	//zmienne
+         		$scope.przebieg =0;
+         		$rootScope.lodowka =0;
+         		$rootScope.tablica=[$location.path()];
+         		$rootScope.tablica[0] = $rootScope.tablica[0].replace('/', '');
+         		//console.log($rootScope.tablica[0]);
+         		//var jsonString = JSON.stringify($rootScope.tablica);
+         		//console.log(el);
+             //funkcje
+         	//start(
+         	$scope.edit=function(){
+         		var url = angular.element(document).find("input").val();
+         		$location.path(url);
+         		//console.log($location.path());
+         		/*
+         		<?php
+            if (isset($_POST['table_name'])){
+            $conn=mysqli_connect("localhost", "root", "", "notes");
+            $table_name=htmlentities($_POST['table_name']);
+            $rs=mysqli_query($conn,"SELECT * FROM names WHERE name='$table_name'");
+            $rec=mysqli_fetch_array($rs);
+            if ($rec[0]>0)$error = "<b>Nazwa juz istnieje</b><br>";
+             else
+            	$rs=mysqli_query($conn,"INSERT INTO `names` (name) VALUES('$table_name');");
+            	$rs=mysqli_query($conn,"CREATE TABLE $table_name (divs varchar(255))" );
+            } else
+            $error = false;
+            ?>*/
+         	}
+         	//$rootScope.tablica=[$location.path()];
+         	//notes
+             $scope.add=function(){
+         	$scope.przebieg ++;
+         	$rootScope.lodowka ++;
+         	//contenteditable="true"
+             var el=$compile('<div drag ><font  class="tt">New note</font ></div>')($scope);
+             $('#main').append(el);
+         	/*
+         	//$('#main').children()[($rootScope.lodowka - 1)].outerHTML;
+         	var x = $('#main').children()[($rootScope.lodowka - 1)].style.left;
+         	var y = $('#main').children()[($rootScope.lodowka - 1)].style.top;
+         	var sx = $('#main').children()[($rootScope.lodowka - 1)].style.width;
+         	var sy = $('#main').children()[($rootScope.lodowka - 1)].style.height;
+         	var index = $('#main').children()[($rootScope.lodowka - 1)].style.zIndex;
+         	var text = $('#main').children()[($rootScope.lodowka - 1)].lastChild.innerHTML;
+         	console.log(x);
+         	console.log(y);
+         	console.log(sx);
+         	console.log(sy);
+         	console.log(text);
+         	console.log(index);
+         	var obj ={x:x,
+         		y:y,
+         		sx: sx,
+         		sy: sy,
+         		text: text,
+         		index: index
+         	}
+         	
+         	console.log(obj);
+         	 $rootScope.tablica[$rootScope.lodowka] = obj;
+         	 console.log($rootScope.tablica);
+         	*/
+         
+             }
+         });
+         
+         app.directive('drag', function(dragable,sizer,deleteit,edit) {
+           return {
+             link:function(scope,element){
+                 dragable.init(element);
+         		dragable.drag(element);     
+                 sizer.init(element);
+         		deleteit.init(element);
+         		edit.init(element);
+              }
+           }
+         });
+         
+         
+         ///////////////////////services///////////////////////
+         
+         app.service("dragable",function($document,$rootScope,$http,$location){
+                 this.init=function(el){
+                         angular.element(el).attr("class", "divs");
+         				el[0].style.zIndex=$rootScope.lodowka;
+         				//console.log(el[0].style.zIndex);
+         				
+         				///////////http
+         					$http.get("send.php?operacja=tworz&name="+$rootScope.tablica[0]+"&index="+$rootScope.lodowka)
+         				.then(function(response){
+         					//console.log(response)
+         				},function(response){
+         				
+         				})
+                 }
+         
+         		//var zindex =1;
+                 this.drag=function(el){
+                     el.bind('mousedown',function(){
+         				//console.log(main_lng);
+         				event.preventDefault();
+                         var startx = event.clientX-this.getBoundingClientRect().x;
+                         var starty = event.clientY-this.getBoundingClientRect().y;
+         				//zindex
+         				var ourTable = new Array($rootScope.lodowka);
+         				for(var i = 0; i<$rootScope.lodowka; i++){
+						//console.log(Number((angular.element(document.querySelector( '#main' ) )[0].childNodes[i+1].style.zIndex)))
+         				if(Number((angular.element(document.querySelector( '#main' ) )[0].childNodes[i].style.zIndex)) > Number(el[0].style.zIndex) )
+         				angular.element(document.querySelector( '#main' ) )[0].childNodes[i].style.zIndex--;
+         				ourTable[i] =angular.element(document.querySelector( '#main' ) )[0].childNodes[i].style.zIndex;
+         				}
+         				el[0].style.zIndex=$rootScope.lodowka;
+         				//console.log(ourTable);
+         				
+         				//zindex ++;
+         				
+         				el[0].style.background="#762354";
+         				el[0].childNodes[3].style.background="#762354";
+                         //console.log(startx);
+                         //console.log(starty);
+         				//console.log(this.getBoundingClientRect());
+         				$document.bind('mousemove',function(){
+                             var x =event.clientX-startx ;
+                             var y =event.clientY-starty ;
+                             //console.log(x);
+                             //console.log(y);
+         					angular.element(el).css({
+         						top:y + 'px',
+         						left:x+ 'px'
+         					});
+                        });
+                     });
+         			el.bind('mouseup',function(){
+         				var x = el[0].style.left;
+         				var y = el[0].style.top;
+         				var index = el[0].style.zIndex;
+         				//console.log(y);
+         				//$rootScope.tablica[(curchild(el[0].outerHTML)+1)].x = x;
+         				//$rootScope.tablica[(curchild(el[0].outerHTML)+1)].y = y;
+         				//$rootScope.tablica[(curchild(el[0].outerHTML)+1)].index = index;
+         				$http.get("send.php?operacja=mousemove&name="+$rootScope.tablica[0]+"&lodowka="+$rootScope.lodowka+"&index="+index+"&top="+y+"&left="+x)
+         				.then(function(response){
+         					//console.log(response)
+         				},function(response){
+         				
+         				})
+         
+         			
+         				el[0].style.background="white";
+         				el[0].childNodes[3].style.background="white";
+         				$document.unbind('mousemove');
+         				//el.unbind('mouseup');
+         				///////////////////////////////////////////
+         				//console.log(curchild(el[0].outerHTML));
+         				//$rootScope.tablica[(curchild(el[0].outerHTML)+1)] = el[0].outerHTML;
+         				//jsonString = JSON.stringify($rootScope.tablica);
+         				//console.log(jsonString);
+         			});
+         		}
+         });
+             
+         app.service("sizer",function($document,$rootScope,$http){
+                 this.init=function(el){
+                    var img = angular.element("<img src='size.png'/>");
+                         angular.element(img).css({
+                                 width:"30px",
+                                 height:"30px",
+                                 position:"relative",
+                                 top:'calc(100% - 30px)',
+                                 left:'calc(100% - 90px)'
+         					});
+                         el.prepend(img);
+         			
+                     img.bind('mousedown',function(){
+         							//zindex
+         				var ourTable = new Array($rootScope.lodowka);
+         				for(var i = 0; i<$rootScope.lodowka; i++){
+         				if(Number((angular.element(document.querySelector( '#main' ) )[0].childNodes[i].style.zIndex)) > Number(el[0].style.zIndex) )
+         				angular.element(document.querySelector( '#main' ) )[0].childNodes[i].style.zIndex--;
+         							ourTable[i] =angular.element(document.querySelector( '#main' ) )[0].childNodes[i].style.zIndex;
+         				}
+         				el[0].style.zIndex=$rootScope.lodowka-1;
+         				//console.log(ourTable);
+         				
+         				//zindex ++;
+                         event.preventDefault();
+         				el[0].style.background="#762354";
+         				el[0].childNodes[3].style.background="#762354";
+                         event.stopPropagation();
+                         var startx = event.clientX-el[0].getBoundingClientRect().width;
+                         var starty = event.clientY-el[0].getBoundingClientRect().height;
+         				//console.log(el[0]);
+                         $document.bind('mousemove',function(){
+                             var x = startx -event.clientX;
+                             var y = starty -event.clientY;
+                             //console.log(x);
+                             //console.log(y);
+                             
+         					angular.element(el).css({
+         						height:-y + 'px',
+         						width:-x + 'px'
+         					});
+                             
+                        });
+                         
+                     });
+         			el.bind('mouseup',function(){
+         			////
+         			/*
+         				$http.get("index.php?operacja=resize&index="+(el[0].style.index)+"&dlug="+($rootScope.lodowka)+"&width="+(el[0].style.width)+"&height="+(el[0].style.height))
+         					.then(function(response){
+         						console.log(response)
+         					},function(response){
+         					
+         					})*/
+         			////
+         			el[0].style.background="white";
+         			el[0].childNodes[3].style.background="white";
+         				$document.unbind('mousemove');
+         				////////////////
+         				//$rootScope.tablica[(curchild(el[0].outerHTML)+1)] = el[0].outerHTML;
+         				//jsonString = JSON.stringify($rootScope.tablica);
+         				//console.log(jsonString);
+         			});
+                 }
+         });
+         app.service("deleteit",function($document,$rootScope,$http){
+                 this.init=function(el){
+         			var img = angular.element("<img src='delete.png'/>");
+                         angular.element(img).css({
+                                 width:"30px",
+                                 height:"30px",
+                                 position:"relative",
+                                 left:'calc(100% - 60px)'
+         					});
+                         el.prepend(img);
+         			
+         			img.bind('click',function(){
+         			$rootScope.lodowka --;
+         			//console.log($rootScope.lodowka);
+         			/////////////
+         			$http.get("index.php?operacja=usun&index="+el[0].style.zIndex+"&dlug="+$rootScope.lodowka)
+         								.then(function(response){
+         						//console.log(response)
+         					},function(response){
+         					
+         					})
+         			$rootScope.tablica.splice((curchild(el[0].outerHTML)+1), 1);
+         			jsonString = JSON.stringify($rootScope.tablica);		
+         			/////////////
+         			el[0].remove();
+         			$rootScope.$apply();
+         			});
+                 }
+         });
+         app.service("edit",function($document,$rootScope){
+                 this.init=function(el){
+         			var img = angular.element("<img src='edit.png'/>");
+                         angular.element(img).css({
+                                 width:"30px",
+                                 height:"30px",
+                                 position:"relative",
+         					});
+                         el.prepend(img);
+         			
+         			img.bind('click',function(){
+         				var elem =el[0].childNodes[3];
+         				var text = angular.element(elem).html();
+         				var editpool = angular.element('<div id="mytextarea"></div>');
+						
+						
+						alert("It is not working yet");
+         				//editpool.text(text);
+         				//console.log(editpool[0]);
+                        // $document[0].body.prepend(editpool[0]);
+         				/*
+         				tinymce.init({
+         					selector: '#mytextarea',
+         					menubar: "insert",
+         					plugins : 'advlist autolink link image lists charmap print preview',
+             				toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify image ",
+         					max_width: '100%',
+         					min_width: '30%',
+         					width: '80%',
+         					resize: 'both',
+         					theme: 'modern',
+         					branding: false
+         					//setup: function (editor) {
+         					//editor.on(init, function (e) {
+         						//let buttons = $compile("<div class=.material-icons noselect cancel' cancel-edit>close0div, .cdiv class.'material-icons noselect save. save-edit,save.c/div")($scope);
+         						//let bar = document.querySelector("#mceu_17-body");
+         						//angular.element(bar).append(buttons);
+         						//editor.execCommand('mceInsertGontent', false, inside);
+         						//angular.element(document.body).append(..ink bref...httos /fonts, eanis.can/icon,famill rel.-stylesheet.,);
+         						//angular.element(document.queryselector(..mceu_r)).cssCposition.„ 'absolute.); 
+         						//}); 
+         				}
+         				
+         			*/
+         			});
+         			
+                 }
+         });
+         /////////////funkcje//////////////
+         
+         function curchild(focus){
+         				var main_lng = $('#main').children().length;
+         				//console.log(focus);
+         				for (i = 0; i < main_lng; i++) {
+         				//console.log($('#main').children()[i].outerHTML)
+         					if($('#main').children()[i].outerHTML == focus)return i;
+         				}
+         }
+         
+      </script>
+   </head>
+   <body ng-app="myApp" >
+      <div ng-view></div>
+      <div id="main"></div>
+	 <a href=".."><img src="back.png" style="height:4vh;width:4vh;position:absolute;left:0;top:94vh;"/></a>
+   </body>
+</html>
